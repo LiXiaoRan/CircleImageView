@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="CircleImageView">
-        <attr name="raidus" format="integer"></attr>
+        <attr name="raidus" format="dimension"></attr>
         <attr name="type" format="enum">
             <enum name="circle" value="0"></enum>
             <enum name="round" value="1"></enum>
