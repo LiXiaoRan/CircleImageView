@@ -49,7 +49,7 @@ public class CircleImageView extends ImageView {
     private Paint mBitmapPaint;
 
     /**
-     * 圆角半径
+     * 圆的半径
      */
     private int mRadius;
 
