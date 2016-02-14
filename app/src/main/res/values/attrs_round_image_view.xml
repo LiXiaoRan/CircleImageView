@@ -1,7 +1,7 @@
 <resources>
     <declare-styleable name="RoundImageView">
         <attr name="borderRadius" format="dimension"></attr>
-        <attr name="type" format="enum">
+        <attr name="Type" format="enum">
             <enum name="circle" value="0"></enum>
             <enum name="round" value="1"></enum>
         </attr>

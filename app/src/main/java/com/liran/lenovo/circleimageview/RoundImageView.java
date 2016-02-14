@@ -4,9 +4,11 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.RectF;
 import android.graphics.Xfermode;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -68,7 +70,7 @@ public class RoundImageView extends ImageView {
         final TypedArray a = getContext().obtainStyledAttributes(
                 attrs, R.styleable.RoundImageView, defStyle, 0);
 
-        type = a.getInt(R.styleable.RoundImageView_type, TYPE_CIRCLE);
+        type = a.getInt(R.styleable.RoundImageView_Type, TYPE_CIRCLE);
         mBorderRadius = a.getDimension(R.styleable.RoundImageView_borderRadius, BODER_RADIUS_DEFAULT);
 
         a.recycle();
@@ -117,12 +119,73 @@ public class RoundImageView extends ImageView {
 
                     scale = getWidth() * 1.0f / Math.min(dwidth, dheight);
                 }
+                drawable.setBounds(0, 0, (int) (scale * dwidth), (int) (scale * dheight));
+                drawable.draw(drawCanvas);
+
+                if (mMaskBitmap == null || mMaskBitmap.isRecycled()) {
+                    mMaskBitmap = getBitmap();
+                }
+
+                // Draw Bitmap.
+                mPaint.reset();
+                mPaint.setFilterBitmap(false);
+                mPaint.setXfermode(mXfermode);
+                //绘制形状
+                drawCanvas.drawBitmap(mMaskBitmap, 0, 0, mPaint);
+                mPaint.setXfermode(null);
+                //将准备好的bitmap绘制出来
+                canvas.drawBitmap(bitmap, 0, 0, null);
+                //bitmap缓存起来，避免每次调用onDraw，分配内存
+                mWeakBitmap = new WeakReference<Bitmap>(bitmap);
+
             }
 
+        }
+
+        //如果bitmap还存在，则直接绘制即可
+        if (bitmap != null)
+        {
+            mPaint.setXfermode(null);
+            canvas.drawBitmap(bitmap, 0.0f, 0.0f, mPaint);
+            return;
         }
 
 
     }
 
 
+    public Bitmap getBitmap() {
+
+        Bitmap bitmap = Bitmap.createBitmap(getWidth(), getHeight(),
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(Color.BLACK);
+
+        if (type == TYPE_ROUND)
+        {
+            canvas.drawRoundRect(new RectF(0, 0, getWidth(), getHeight()),
+                    mBorderRadius, mBorderRadius, paint);
+        } else
+        {
+            canvas.drawCircle(getWidth() / 2, getWidth() / 2, getWidth() / 2,
+                    paint);
+        }
+
+        return bitmap;
+
+    }
+
+
+    @Override
+    public void invalidate()
+    {
+        mWeakBitmap = null;
+        if (mMaskBitmap != null)
+        {
+            mMaskBitmap.recycle();
+            mMaskBitmap = null;
+        }
+        super.invalidate();
+    }
 }
